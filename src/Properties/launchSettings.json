@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "QuotefancyDownloader": {
+      "commandName": "Project",
+      "commandLineArgs": "-s 38710 -u"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 ﻿using QuotefancyDownloader.Modes;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
@@ -9,21 +10,24 @@ namespace QuotefancyDownloader
 {
     internal class Program
     {
-        private static async Task<int> Main(string[] args)
+        private static int Main(string[] args)
         {
-            var options = new Options();
-            bool argumentsParsed = Parser.Default.ParseArguments(args, options);
-            if (!argumentsParsed)
-                 return 0;
+            Parser.Default.ParseArguments<Options>(args)
+                .WithParsed(RunOptionsAndReturnExitCode)
+                .WithNotParsed(HandleParseError);
 
+            return 0;
+        }
+
+        private static void RunOptionsAndReturnExitCode(Options options)
+        {
             CheckForOutputDirectory(options.OutputPath);
 
             Console.WriteLine("Start downloading");
 
-            await StartDownloading(options);
+            StartDownloading(options).GetAwaiter().GetResult();
 
             Console.WriteLine("Download finished");
-            return 0;
         }
 
         private static void CheckForOutputDirectory(string outputDirectory)
@@ -70,14 +74,21 @@ namespace QuotefancyDownloader
         private static void SaveAsFile(int index, WebResponse response, Options options)
         {
             string path = Path.Combine(options.OutputPath, $"quotefancy{index}.jpg");
+
             using (var stream = response.GetResponseStream())
             {
-                if (stream == null)
+                if (stream is null)
                     return;
 
                 using (var fileStream = File.Create(path))
                     stream.CopyTo(fileStream);
             }
+        }
+
+        private static void HandleParseError(IEnumerable<Error> errors)
+        {
+            foreach (var error in errors)
+                Console.WriteLine(error);
         }
     }
 }
