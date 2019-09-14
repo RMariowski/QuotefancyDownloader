@@ -31,8 +31,6 @@ namespace QuotefancyDownloader.Modes
                 await Task.WhenAll(tasks);
 
                 tasks.Clear();
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
             }
         }
     }
